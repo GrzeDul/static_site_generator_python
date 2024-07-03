@@ -41,7 +41,7 @@ class ParentNode(HTMLNode):
             raise ValueError("no tag to create node")
         if self.children is None:
             raise ValueError("no children to create node")
-        node_html = f'<{self.tag}{self.props_to_html()}>{self.value if self.value else ''}'
+        node_html = f"<{self.tag}{self.props_to_html()}>{self.value if self.value else ''}"
         if self.children:
             for child in self.children:
                 node_html+=child.to_html()
