@@ -44,33 +44,48 @@ def extract_markdown_links(text):
     return list(matches)
 
 def split_nodes_image(old_nodes):
+    result = []
     for old_node in old_nodes:
         matches = extract_markdown_images(old_node.text)
-        result = []
         last_end = 0
-        for match in matches:
-            start, end = match.span()
-            if last_end != start:
-                result.append(TextNode(old_node.text[last_end:start], text_type_text))
-            result.append(TextNode(match.group(1), text_type_image, match.group(2)))
-            last_end = end
+        if len(matches) == 0:
+            result.append(old_node)
+        else:
+            for match in matches:
+                start, end = match.span()
+                if last_end != start:
+                    result.append(TextNode(old_node.text[last_end:start], text_type_text))
+                result.append(TextNode(match.group(1), text_type_image, match.group(2)))
+                last_end = end
 
-        if last_end < len(old_node.text):
-            result.append(TextNode(old_node.text[last_end:], text_type_text))
+            if last_end < len(old_node.text):
+                result.append(TextNode(old_node.text[last_end:], text_type_text))
     return result
 
 def split_nodes_link(old_nodes):
+    result = []
     for old_node in old_nodes:
         matches = extract_markdown_links(old_node.text)
-        result = []
         last_end = 0
-        for match in matches:
-            start, end = match.span()
-            if last_end != start:
-                result.append(TextNode(old_node.text[last_end:start], text_type_text))
-            result.append(TextNode(match.group(1), text_type_link, match.group(2)))
-            last_end = end
-        if last_end < len(old_node.text):
-            result.append(TextNode(old_node.text[last_end:], text_type_text))
+        if len(matches) == 0:
+            result.append(old_node)
+        else:
+            for match in matches:
+                start, end = match.span()
+                if last_end != start:
+                    result.append(TextNode(old_node.text[last_end:start], text_type_text))
+                result.append(TextNode(match.group(1), text_type_link, match.group(2)))
+                last_end = end
+            if last_end < len(old_node.text):
+                result.append(TextNode(old_node.text[last_end:], text_type_text))
     return result
-        
+
+def text_to_textnodes(text):
+    nodes = [TextNode(text, text_type_text)]
+    nodes = split_nodes_delimiter(nodes, "**", text_type_bold)
+    nodes = split_nodes_delimiter(nodes, "*", text_type_italic)
+    nodes = split_nodes_delimiter(nodes, "`", text_type_code)
+    nodes = split_nodes_image(nodes)
+    nodes = split_nodes_link(nodes)
+    return nodes
+
